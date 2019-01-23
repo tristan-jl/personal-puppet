@@ -12,6 +12,8 @@ class desktop {
   include desktop::screensaver
   include desktop::venv
 
+  include desktop::test
+
   include packages::debian_packaging
   include packages::build_deps
   include packages::editors
