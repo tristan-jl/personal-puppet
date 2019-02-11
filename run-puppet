@@ -13,6 +13,11 @@ PERSONAL_PUPPET = os.path.join(
 GEM_HOME = os.path.join(PERSONAL_PUPPET, 'gems')
 GEM_BIN = os.path.join(GEM_HOME, 'bin')
 PUPPET_BIN = os.path.join(GEM_BIN, 'puppet')
+GEMS = (
+    ('eyaml', 'hiera-eyaml-sshagent', '>=0.1,<0.2'),
+    ('puppet', 'puppet', '>=5,<6'),
+    ('r10k', 'r10k', '>=2,<3'),
+)
 
 HERE = os.path.dirname(os.path.realpath(__file__))
 MODULE_PATH = ':'.join(os.path.join(HERE, d) for d in ('modules', 'vendor'))
@@ -31,11 +36,11 @@ def main() -> NoReturn:
     os.environ['GEM_HOME'] = GEM_HOME
     os.environ['PATH'] = GEM_BIN + os.pathsep + os.environ['PATH']
 
-    for exe, version in (('puppet', '>=5,<6'), ('r10k', '>=2,<3')):
+    for exe, gem, version in GEMS:
         if not os.path.exists(os.path.join(GEM_BIN, exe)):
-            _msg('Ensuring {} is installed...'.format(exe))
+            _msg('Ensuring {} is installed...'.format(gem))
             cmd: Tuple[str, ...]
-            cmd = ('gem', 'install', exe, '-v', version, '--no-document')
+            cmd = ('gem', 'install', gem, '-v', version, '--no-document')
             subprocess.check_call(cmd)
 
     _msg('Installing puppet modules...')
