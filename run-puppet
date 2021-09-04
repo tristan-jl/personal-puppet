@@ -6,64 +6,72 @@ from typing import Tuple
 
 
 PERSONAL_PUPPET = os.path.join(
-    os.environ.get('XDG_CACHE_DIR', os.path.expanduser('~/.cache')),
-    'personal-puppet',
+    os.environ.get("XDG_CACHE_DIR", os.path.expanduser("~/.cache")),
+    "personal-puppet",
 )
-GEM_HOME = os.path.join(PERSONAL_PUPPET, 'gems')
-GEM_BIN = os.path.join(GEM_HOME, 'bin')
+GEM_HOME = os.path.join(PERSONAL_PUPPET, "gems")
+GEM_BIN = os.path.join(GEM_HOME, "bin")
 
 HERE = os.path.dirname(os.path.realpath(__file__))
-MODULE_PATH = ':'.join(os.path.join(HERE, d) for d in ('modules', 'vendor'))
+MODULE_PATH = ":".join(os.path.join(HERE, d) for d in ("modules", "vendor"))
 
 GEMS = (
-    ('puppet', '5.5.21'),
-    ('r10k', '3.5.2'),
+    ("puppet", "5.5.21"),
+    ("r10k", "3.5.2"),
     # TODO: puppet 5.x is broken on ruby 2.7
-    ('sync', '0.5.0'),
+    ("sync", "0.5.0"),
 )
 
 
 def _msg(s: str) -> None:
-    print('=' * 79)
+    print("=" * 79)
     print(s)
-    print('=' * 79, flush=True)
+    print("=" * 79, flush=True)
 
 
 def main() -> int:
-    if subprocess.call(('ssh-add', '-l'), stdout=subprocess.DEVNULL):
-        subprocess.check_call('ssh-add')
+    if subprocess.call(("ssh-add", "-l"), stdout=subprocess.DEVNULL):
+        subprocess.check_call("ssh-add")
 
-    os.environ['GEM_HOME'] = GEM_HOME
-    os.environ['PATH'] = GEM_BIN + os.pathsep + os.environ['PATH']
+    os.environ["GEM_HOME"] = GEM_HOME
+    os.environ["PATH"] = GEM_BIN + os.pathsep + os.environ["PATH"]
 
     for gem, version in GEMS:
-        if not os.path.exists(os.path.join(GEM_HOME, f'gems/{gem}-{version}')):
-            _msg(f'Ensuring {gem} is installed...')
+        if not os.path.exists(os.path.join(GEM_HOME, f"gems/{gem}-{version}")):
+            _msg(f"Ensuring {gem} is installed...")
             cmd: Tuple[str, ...]
-            cmd = ('gem', 'install', gem, '-v', version, '--no-document')
+            cmd = ("gem", "install", gem, "-v", version, "--no-document")
             subprocess.check_call(cmd)
 
-    _msg('Installing puppet modules...')
-    subprocess.check_call(('r10k', 'puppetfile', 'install'), cwd=HERE)
-    subprocess.check_call(('r10k', 'puppetfile', 'purge'), cwd=HERE)
+    _msg("Installing puppet modules...")
+    subprocess.check_call(("r10k", "puppetfile", "install"), cwd=HERE)
+    subprocess.check_call(("r10k", "puppetfile", "purge"), cwd=HERE)
 
-    _msg('Execing puppet')
-    ret = subprocess.call((
-        'sudo', 'env',
-        'RUBYOPT=-W0',
-        'PATH={}'.format(os.environ['PATH']),
-        'GEM_HOME={}'.format(os.environ['GEM_HOME']),
-        'SSH_AUTH_SOCK={}'.format(os.environ['SSH_AUTH_SOCK']),
-        'puppet', 'apply', '-v', '--show_diff', '--detailed-exitcodes',
-        '--modulepath', MODULE_PATH,
-        os.path.join(HERE, 'manifests/site.pp'),
-        *sys.argv[1:],
-    ))
+    _msg("Execing puppet")
+    ret = subprocess.call(
+        (
+            "sudo",
+            "env",
+            "RUBYOPT=-W0",
+            "PATH={}".format(os.environ["PATH"]),
+            "GEM_HOME={}".format(os.environ["GEM_HOME"]),
+            "SSH_AUTH_SOCK={}".format(os.environ["SSH_AUTH_SOCK"]),
+            "puppet",
+            "apply",
+            "-v",
+            "--show_diff",
+            "--detailed-exitcodes",
+            "--modulepath",
+            MODULE_PATH,
+            os.path.join(HERE, "manifests/site.pp"),
+            *sys.argv[1:],
+        )
+    )
     if ret in {0, 2}:  # {no changes, changes}
         return 0
     else:
         return 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     exit(main())

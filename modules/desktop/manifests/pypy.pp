@@ -12,20 +12,20 @@ class desktop::pypy {
     checksum      => $pypy2_sha256,
     checksum_type => 'sha256',
     extract       => true,
-    extract_path  => '/home/asottile/opt',
-    creates       => "/home/asottile/opt/${pypy2}/bin/pypy",
-    user          => 'asottile',
-    group         => 'asottile',
-    require       => [Package['curl'], File['/home/asottile/opt']],
+    extract_path  => '/home/tristan/opt',
+    creates       => "/home/tristan/opt/${pypy2}/bin/pypy",
+    user          => 'tristan',
+    group         => 'tristan',
+    require       => [Package['curl'], File['/home/tristan/opt']],
   }
   ['pypy', 'pypy2'].each |$bin| {
-    file { "/home/asottile/bin/${bin}":
+    file { "/home/tristan/bin/${bin}":
       ensure  => 'link',
-      target  => "/home/asottile/opt/${pypy2}/bin/pypy",
-      owner   => 'asottile',
-      group   => 'asottile',
+      target  => "/home/tristan/opt/${pypy2}/bin/pypy",
+      owner   => 'tristan',
+      group   => 'tristan',
       require => [
-        File['/home/asottile/bin'],
+        File['/home/tristan/bin'],
         Archive["/tmp/${pypy2}.tar.bz2"],
       ],
     }
@@ -37,34 +37,20 @@ class desktop::pypy {
     checksum      => $pypy3_sha256,
     checksum_type => 'sha256',
     extract       => true,
-    extract_path  => '/home/asottile/opt',
-    creates       => "/home/asottile/opt/${pypy3}/bin/pypy3",
-    user          => 'asottile',
-    group         => 'asottile',
-    require       => [Package['curl'], File['/home/asottile/opt']],
+    extract_path  => '/home/tristan/opt',
+    creates       => "/home/tristan/opt/${pypy3}/bin/pypy3",
+    user          => 'tristan',
+    group         => 'tristan',
+    require       => [Package['curl'], File['/home/tristan/opt']],
   }
-  file { '/home/asottile/bin/pypy3':
+  file { '/home/tristan/bin/pypy3':
     ensure  => 'link',
-    target  => "/home/asottile/opt/${pypy3}/bin/pypy3",
-    owner   => 'asottile',
-    group   => 'asottile',
+    target  => "/home/tristan/opt/${pypy3}/bin/pypy3",
+    owner   => 'tristan',
+    group   => 'tristan',
     require => [
-      File['/home/asottile/bin'],
+      File['/home/tristan/bin'],
       Archive["/tmp/${pypy3}.tar.bz2"],
     ],
-  }
-
-  # purge old versions, remove when updated
-  file { [
-    '/home/asottile/opt/pypy2.7-v7.3.1-linux64',
-    '/home/asottile/opt/pypy3.6-v7.3.1-linux64',
-    '/home/asottile/opt/pypy2.7-v7.3.2-linux64',
-    '/home/asottile/opt/pypy3.7-v7.3.2-linux64',
-    '/home/asottile/opt/pypy2.7-v7.3.3-linux64',
-    '/home/asottile/opt/pypy3.7-v7.3.3-linux64',
-  ]:
-    ensure  => 'absent',
-    recurse => true,
-    force   => true,
   }
 }

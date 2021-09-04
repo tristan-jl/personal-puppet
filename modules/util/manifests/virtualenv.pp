@@ -11,7 +11,7 @@ define util::virtualenv(String $venv) {
         "info=\"$(${venv}/bin/python -S -c 'import sys;print(\".\".join(str(p) for p in sys.version_info))')\" && ",
         "grep \"^version_info = \$info$\" ${venv}/pyvenv.cfg",
     ]),
-    user    => 'asottile',
+    user    => 'tristan',
     path    => '/usr/sbin:/usr/bin:/bin',
     require => [Package['curl'], File[dirname($venv)]],
   }

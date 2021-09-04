@@ -1,19 +1,19 @@
 class desktop::homedir {
   file { [
-    '/home/asottile/Documents',
-    '/home/asottile/Pictures',
-    '/home/asottile/Public',
-    '/home/asottile/Templates',
-    '/home/asottile/Videos',
+    '/home/tristan/Documents',
+    '/home/tristan/Pictures',
+    '/home/tristan/Public',
+    '/home/tristan/Templates',
+    '/home/tristan/Videos',
   ]:
     ensure  => 'absent',
     recurse => true,
     force   => true,
   }
 
-  file { ['/home/asottile/bin', '/home/asottile/opt']:
+  file { ['/home/tristan/bin', '/home/tristan/opt']:
     ensure => 'directory',
-    owner  => 'asottile',
-    group  => 'asottile',
+    owner  => 'tristan',
+    group  => 'tristan',
   }
 }

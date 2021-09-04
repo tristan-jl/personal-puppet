@@ -1,65 +1,60 @@
 class desktop::dotfiles {
   $dotfiles = [
-    '.bashrc', '.bash_aliases', '.gitconfig', '.hgrc', '.nanorc', '.pdbrc',
-    '.pypirc', '.pythonrc.py', '.tmux.conf',
+    '.bashrc', '.bash_aliases', '.gitconfig', '.pdbrc', '.pypirc', '.pythonrc.py',
+    '.tmux.conf',
   ]
   $binfiles = [
     'bash/git-happy-merge', 'python/git-github-compare',
     'python/git-github-fork', 'python/git-github-url',
     'python/inotify-exec', 'python/prune-remote-branches',
   ]
+  $configdirs = ['coc', 'nvim']
 
-  vcsrepo { '/home/asottile/workspace/scratch':
+  vcsrepo { '/home/tristan/workspace/dotfiles':
     ensure   => 'present',
-    user     => 'asottile',
+    user     => 'tristan',
     provider => 'git',
-    source   => 'git@github.com:asottile/scratch',
+    source   => 'git@github.com:tristan-jl/dotfiles',
   }
 
   $dotfiles.each |$f| {
-    file { "/home/asottile/${f}":
+    file { "/home/tristan/${f}":
       ensure  => 'link',
-      target  => "/home/asottile/workspace/scratch/${f}",
-      owner   => 'asottile',
-      group   => 'asottile',
-      require => Vcsrepo['/home/asottile/workspace/scratch'],
+      target  => "/home/tristan/workspace/dotfiles/${f}",
+      owner   => 'tristan',
+      group   => 'tristan',
+      require => Vcsrepo['/home/tristan/workspace/dotfiles'],
     }
   }
 
-  file { '/home/asottile/.config/babi':
-    ensure => 'directory',
-    owner  => 'asottile',
-    group  => 'asottile',
-  } ->
-  file { '/home/asottile/.config/babi/theme.json':
-    ensure    => 'link',
-    target    => '/home/asottile/workspace/scratch/.config/babi/theme.json',
-    owner     => 'asottile',
-    group     => 'asottile',
-      require => Vcsrepo['/home/asottile/workspace/scratch'],
-  }
-
   $binfiles.each |$f| {
-    file { "/home/asottile/bin/${basename($f)}":
+    file { "/home/tristan/bin/${basename($f)}":
       ensure  => 'link',
-      target  => "/home/asottile/workspace/scratch/${f}",
-      owner   => 'asottile',
-      group   => 'asottile',
+      target  => "/home/tristan/workspace/dotfiles/${f}",
+      owner   => 'tristan',
+      group   => 'tristan',
       require => [
-        Vcsrepo['/home/asottile/workspace/scratch'],
-        File['/home/asottile/bin'],
+        Vcsrepo['/home/tristan/workspace/dotfiles'],
+        File['/home/tristan/bin'],
       ],
     }
   }
 
-  # many scripts use this, though we can't set contents quite yet
-  file { '/home/asottile/.github-auth.json':
-    ensure => 'present',
-    owner  => 'asottile',
-    group  => 'asottile',
-    mode   => '0600',
+  $configdirs.each |$f| {
+    file { "/home/tristan/.config/${basename($f)}":
+      ensure    => 'link',
+      target    => "/home/tristan/workspace/dotfiles/${basename($f)}",
+      owner     => 'tristan',
+      group     => 'tristan',
+        require => Vcsrepo['/home/tristan/workspace/dotfiles'],
+    }
   }
 
-  # TODO: remove eventually
-  file { '/home/asottile/bin/prune-remote-branches.py': ensure => 'absent' }
+  # many scripts use this, though we can't set contents quite yet
+  file { '/home/tristan/.github-auth.json':
+    ensure => 'present',
+    owner  => 'tristan',
+    group  => 'tristan',
+    mode   => '0600',
+  }
 }

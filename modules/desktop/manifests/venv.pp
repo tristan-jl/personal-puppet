@@ -1,15 +1,14 @@
 class desktop::venv {
   $packages = [
-    'aactivator', 'awshelp', 'babi', 'flake8', 'pre-commit', 'tox', 'twine',
-    'virtualenv',
+    'aactivator', 'black', 'flake8', 'pre-commit', 'tox', 'twine', 'virtualenv',
   ]
-  $venv = '/home/asottile/opt/venv'
+  $venv = '/home/tristan/opt/venv'
 
   util::virtualenv { $venv: venv => $venv }
 
   # TODO: this is quite slow, ideally I'd like something like
-  # venv { '/home/asottile/opt/venv':
-  #     user => 'asottile',
+  # venv { '/home/tristan/opt/venv':
+  #     user => 'tristan',
   #     packages => $packages,
   # }
   $packages.each |$pkg| {
@@ -21,44 +20,30 @@ class desktop::venv {
   }
 
   $packages.each |$bin| {
-    file { "/home/asottile/bin/${bin}":
+    file { "/home/tristan/bin/${bin}":
       ensure  => 'link',
       target  => "${venv}/bin/${bin}",
-      owner   => 'asottile',
-      group   => 'asottile',
+      owner   => 'tristan',
+      group   => 'tristan',
       require => [
-        File['/home/asottile/bin'],
+        File['/home/tristan/bin'],
         Util::Pip["${venv}(${bin})"],
       ],
     }
   }
 
   # awscli deps conflict a lot so put them in their own environment
-  $venv_aws = '/home/asottile/opt/awscli'
-  util::virtualenv { $venv_aws: venv => $venv_aws } ->
-  util::pip { "${venv_aws}(awscli)": pkg => 'awscli', venv => $venv_aws} ->
-  file { '/home/asottile/bin/aws':
+  $venv_aws = '/home/tristan/opt/awscli'
+  util::virtualenv { $venv_aws: venv => $venv_aws }
+  -> util::pip { "${venv_aws}(awscli)": pkg => 'awscli', venv => $venv_aws}
+  -> file { '/home/tristan/bin/aws':
     ensure  => 'link',
     target  => "${venv_aws}/bin/aws",
-    owner   => 'asottile',
-    group   => 'asottile',
+    owner   => 'tristan',
+    group   => 'tristan',
     require => [
-      File['/home/asottile/bin'],
+      File['/home/tristan/bin'],
       Util::Pip["${venv_aws}(awscli)"],
-    ],
-  }
-
-  $venv_az = '/home/asottile/opt/azcli'
-  util::virtualenv { $venv_az: venv => $venv_az } ->
-  util::pip { "${venv_az}(azure-cli)": pkg => 'azure-cli', venv => $venv_az} ->
-  file { '/home/asottile/bin/az':
-    ensure  => 'link',
-    target  => "${venv_az}/bin/az",
-    owner   => 'asottile',
-    group   => 'asottile',
-    require => [
-      File['/home/asottile/bin'],
-      Util::Pip["${venv_az}(azure-cli)"],
     ],
   }
 }
